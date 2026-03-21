@@ -1,4 +1,4 @@
-mapboxgl.accessToken='pk.eyJ1IjoiMHNzZXJ2YXRvcmUiLCJhIjoiY21scG0zOTlvMHVkcjNlb29rcmJvY2E5NCJ9.hNL8uFuAQgLTBrccNpVgSA';
+mapboxgl.accessToken='pk.eyJ1IjoiMHNzZXJ2YXRvcmUiLCJhIjoiY21tenY2dTc0MGMxMTJ0b2lkYjZyMDVtcyJ9.GSGQIxhvNJRxStEjwjtwoQ';
 
 const WORKER_URL='https://jerga-turso-proxy.osservatore.workers.dev';
 
