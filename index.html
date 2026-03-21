@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JERGA SUDAKA — AMAR, ENTENDER Y DISCUTIR EL HIP HOP</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+<div id="hdr">
+  <div><div id="logo-t">JERGA SUDAKA</div><div id="logo-s">AMAR, ENTENDER Y DISCUTIR EL HIP HOP</div></div>
+  <div id="hdr-r">
+    <div id="sw"><input id="si" type="text" placeholder="Buscar artista, crew, barrio..." autocomplete="off"><span id="si-icon">⌕</span><div id="sr"></div></div>
+    <button id="dm-toggle" onclick="toggleDark()">☽ DARK</button>
+    <button id="btn-add" onclick="openModal()">+ AGREGAR ARTISTA</button>
+  </div>
+</div>
+<div id="tabs">
+  <div class="tab active" id="tab-map" onclick="if(window.switchToMap)switchToMap()">MAPA</div>
+</div>
+<div id="map-view">
+  <div id="map"></div>
+  <div id="cx-overlay"><svg id="cx-svg"></svg></div>
+</div>
+<div class="panel" id="ap">
+  <div class="ptop"><button class="xbtn" id="p-edit-btn" style="margin-right:auto;font-size:10px" onclick="openEditArtist()">✎ EDITAR</button><button class="xbtn" onclick="closeAP()">✕ CERRAR</button></div>
+  <div class="pbody">
+    <div class="phdr"><div class="pav" id="p-av"></div><div><div class="pname" id="p-nm"></div><div id="p-bd"></div></div></div>
+    <div class="ploc"><span class="pln" id="p-br"></span> · <span id="p-ci"></span></div>
+    <hr class="pdiv">
+    <div><div class="plbl">Crew</div><div class="pcrew" id="p-cr"></div></div>
+    <div><div class="plbl">Géneros</div><div id="p-gn" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px"></div></div>
+    <div><div class="plbl">Descripción</div><div class="pval" id="p-de"></div></div>
+    <div><div class="plbl">Links</div><div class="plks" id="p-lk"></div></div>
+    <div id="p-cw" style="display:none"><div class="plbl">Colabos</div><div class="mlist" id="p-cl"></div></div>
+    <div id="p-mg" style="display:none"><div class="plbl">Manager / Booking</div><div id="p-mg-c" style="font-size:11px;color:var(--t2)"></div></div>
+    <hr class="pdiv">
+    <div id="p-yw" style="display:none">
+      <div class="plbl">Última entrevista en Jerga Sudaka</div>
+      <div class="pyt"><iframe id="p-yf" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>
+    </div>
+    <hr class="pdiv">
+    <div id="p-disco">
+      <div class="disco-hdr">
+        <div class="plbl" style="margin:0">Discografía</div>
+        <div class="disco-btns">
+          <button class="disco-btn" onclick="openAddRelease()">+ AGREGAR</button>
+          <button class="disco-btn" onclick="openEditReleases()">✎ EDITAR</button>
+        </div>
+      </div>
+      <div class="disco-tabs">
+        <button class="disco-tab active" id="dtab-lp" onclick="switchDiscoTab('lp')">LP (<span id="disco-count-lp">0</span>)</button>
+        <button class="disco-tab" id="dtab-ep" onclick="switchDiscoTab('ep')">EP (<span id="disco-count-ep">0</span>)</button>
+        <button class="disco-tab" id="dtab-single" onclick="switchDiscoTab('single')">Single (<span id="disco-count-single">0</span>)</button>
+      </div>
+      <div id="disco-list"></div>
+    </div>
+  </div>
+</div>
+<div class="panel" id="bp">
+  <div class="ptop"><button class="xbtn" onclick="closeBP()">✕ CERRAR</button></div>
+  <div class="pbody">
+    <div><div class="bigname" id="bp-n"></div><div class="ploc" style="margin-top:4px"><span id="bp-l"></span></div></div>
+    <hr class="pdiv">
+    <div><div class="plbl">Artistas del barrio</div><div class="mlist" id="bp-ls"></div></div>
+  </div>
+</div>
+<div class="panel" id="cp">
+  <div class="ptop"><button class="xbtn" onclick="closeCP()">✕ CERRAR</button></div>
+  <div class="pbody">
+    <div><div class="plbl">Crew</div><div class="bigname" id="cp-n"></div></div>
+    <div><div class="plbl">Descripción</div><div class="pval" id="cp-d"></div></div>
+    <hr class="pdiv">
+    <div><div class="plbl">Miembros</div><div class="mlist" id="cp-ls"></div></div>
+  </div>
+</div>
+<div id="flt">
+  <div id="flt-types">
+    <div class="flt-t">Filtrar por tipo</div>
+    <label class="flt-row"><input type="checkbox" id="flt-mc" checked onchange="applyTypeFilter()"><div class="flt-dot" style="color:var(--blue)"></div>Rapero / MC</label>
+    <label class="flt-row"><input type="checkbox" id="flt-prod" checked onchange="applyTypeFilter()"><div class="flt-dot" style="color:var(--gold)"></div>Productor</label>
+    <label class="flt-row"><input type="checkbox" id="flt-pm" checked onchange="applyTypeFilter()"><div class="flt-dot" style="color:var(--purple)"></div>Rap + Prod</label>
+  </div>
+  <label class="flt-row" id="flt-collab-row" style="display:none;margin-top:6px"><input type="checkbox" id="flt-collab" onchange="toggleCrewCollabs()">Mostrar collabs externos</label>
+  <div id="flt-gen-wrap" style="margin-top:8px;border-top:1px solid var(--pb);padding-top:8px">
+    <div class="flt-t" onclick="toggleGeneroDropdown()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none">
+      Subgénero <span id="flt-gen-arrow">▾</span>
+    </div>
+    <div id="flt-gen-body" style="display:none;margin-top:6px">
+      <div id="flt-gen-list"></div>
+    </div>
+  </div>
+</div>
+<div id="flt-cx">
+  <div class="flt-t">Conexiones</div>
+  <div class="li"><div class="ls" style="background:var(--red)"></div>Crew</div>
+  <div class="li"><div class="lda"></div>Collab</div>
+</div>
+<div id="sb"><div class="sdot"></div><span id="sb-t">TODOS LOS MIÉRCOLES DE 18 A 21 HS <a href="https://www.youtube.com/@jergasudaka/videos" target="_blank" rel="noopener" style="color: var(--red); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 4px;">POR NUESTRO CANAL DE YOUTUBE</a></div>
+<div id="mov">
+<div id="modal" onclick="event.stopPropagation()">
+  <div id="mhdr"><div id="mhdr-t">AGREGAR ARTISTA</div><button id="mcls" onclick="closeModal()">✕</button></div>
+  <div id="mbody">
+    <div class="frow">
+      <div class="flbl">Importar desde Spotify <span style="font-size:9px;color:#999">(opcional)</span></div>
+      <div id="sp-search-wrap">
+        <div style="position:relative">
+          <input class="cbinp" id="sp-search-inp" type="text" placeholder="Buscá tu nombre en Spotify para pre-llenar..." autocomplete="off" style="padding-right:90px">
+          <button id="sp-import-btn" onclick="doSpotifySearch()" style="position:absolute;right:0;top:0;height:100%;padding:0 12px;background:var(--red);border:none;color:#fff;font-family:var(--mono);font-size:9px;letter-spacing:1px;cursor:pointer">BUSCAR</button>
+        </div>
+        <div id="sp-results" style="display:none;border:1px solid var(--pb);border-top:none;max-height:200px;overflow-y:auto;background:var(--pbg)"></div>
+        <div id="sp-disco-note" style="display:none;font-size:9px;color:#2a9d2a;letter-spacing:.5px;padding-top:4px"></div>
+      </div>
+    </div>
+    <hr class="pdiv" style="margin:0">
+    <div class="frow"><div class="flbl">Avatar</div>
+      <div id="av-wr"><div id="av-pr"></div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:6px;align-items:center"><button id="av-btn" type="button" onclick="document.getElementById('av-in').click()">+ Subir imagen</button><input id="av-in" type="file" accept="image/png,image/jpeg"></div><input id="av-url" class="finp" type="text" placeholder="…o pegá una URL de imagen" style="font-size:10px" oninput="previewAvatarUrl(this.value)"><div style="font-size:9px;color:#bbb;margin-top:2px">PNG o JPEG</div></div></div>
+    </div>
+    <div class="frow2">
+      <div class="frow"><label class="flbl" for="f-nom">Nombre artístico</label><input class="finp" id="f-nom" type="text" placeholder="Ej: OSSERVATORE"></div>
+      <div class="frow"><label class="flbl" for="f-tipo">Tipo</label>
+        <div class="cbw"><div class="cbinp tipo-sel" id="f-tipo-display" tabindex="0" style="cursor:pointer;display:flex;align-items:center;gap:8px"><span style="color:#bbb">Seleccionar tipo</span></div><input type="hidden" id="f-tipo" value=""><div class="cbl" id="f-tipo-l"></div></div>
+      </div>
+    </div>
+    <div class="frow"><label class="flbl">Barrio / Localidad de origen</label>
+      <div class="cbw"><input class="cbinp" id="f-br" type="text" placeholder="Escribí para buscar..." autocomplete="off"><div class="cbl" id="f-br-l"></div></div>
+      <input type="hidden" id="f-br-v">
+    </div>
+    <div class="frow"><label class="flbl">Crew</label>
+      <div class="cbw"><input class="cbinp" id="f-cr" type="text" placeholder="Nombre de crew o dejá vacío..." autocomplete="off"><div class="cbl" id="f-cr-l"></div></div>
+    </div>
+    <div class="frow"><label class="flbl">Colaboraciones</label>
+      <div class="cbw"><input class="cbinp" id="f-co" type="text" placeholder="Escribí nombre de artista..." autocomplete="off"><div class="cbl" id="f-co-l"></div></div>
+      <div class="ctags" id="f-co-tags"></div><input type="hidden" id="f-co-v">
+    </div>
+    <div class="frow"><label class="flbl" for="f-de">Descripción</label><textarea class="finp" id="f-de" rows="2" placeholder="Breve bio..." style="resize:vertical"></textarea></div>
+    <div class="frow"><div class="flbl">Links sociales</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input class="finp" id="f-ig" type="url" placeholder="◈  Instagram URL">
+        <input class="finp" id="f-yt" type="url" placeholder="▶  YouTube URL">
+        <input class="finp" id="f-sp" type="url" placeholder="♫  Spotify URL">
+        <input class="finp" id="f-sc" type="url" placeholder="◎  SoundCloud URL">
+        <input class="finp" id="f-gn" type="url" placeholder="✦  Genius URL">
+      </div>
+    </div>
+    <div class="frow"><label class="flbl" for="f-en">Última entrevista Jerga Sudaka (YouTube URL)</label><input class="finp" id="f-en" type="url" placeholder="https://youtube.com/watch?v=..."></div>
+    <div class="frow"><label class="flbl">Géneros <span style="font-size:9px;color:#999">(múltiple)</span></label><div id="f-gen-wrap"></div></div>
+    <hr class="pdiv" style="margin:10px 0">
+    <div class="frow"><div class="flbl">Manager / Booking <span style="font-size:9px;color:#999">(opcional)</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input class="finp" id="f-mg-nm" type="text" placeholder="Nombre del manager">
+        <input class="finp" id="f-mg-em" type="email" placeholder="E-Mail">
+        <input class="finp" id="f-mg-ig" type="url" placeholder="◈  Instagram URL">
+      </div>
+    </div>
+  </div>
+  <div id="mft"><button class="mcan" onclick="closeModal()">CANCELAR</button><button class="mdel" id="modal-delete" onclick="deleteArtist()" style="display:none">🗑 ELIMINAR</button><button class="madd" id="modal-submit" onclick="submitArtist()">AGREGAR</button></div></div>
+</div>
+
+<!-- MODAL: Agregar lanzamiento -->
+<div id="rl-mov" onclick="closeAddRelease()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center">
+<div id="rl-modal" onclick="event.stopPropagation()" style="background:var(--bg);border:1px solid var(--pb);width:440px;max-height:88vh;overflow-y:auto;font-family:var(--mono)">
+  <div id="mhdr" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--pb)">
+    <div id="rl-hdr-t" style="font-size:12px;letter-spacing:2px;font-weight:700">AGREGAR LANZAMIENTO</div>
+    <button onclick="closeAddRelease()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--tm)">✕</button>
+  </div>
+  <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
+    <div class="frow"><label class="flbl">Tipo</label>
+      <select class="finp" id="rl-tipo"><option value="lp">LP</option><option value="ep">EP</option><option value="single">Single</option></select>
+    </div>
+    <div class="frow"><label class="flbl">Nombre</label><input class="finp" id="rl-nombre" type="text" placeholder="Nombre del lanzamiento"></div>
+    <div class="frow"><label class="flbl">Fecha</label><input class="finp" id="rl-fecha" type="date"></div>
+    <div class="frow"><label class="flbl">Portada</label>
+      <div style="display:flex;gap:0;margin-bottom:6px">
+        <button class="rl-src-tab active" id="rl-src-url-btn" onclick="switchRlSrc('url')" type="button">URL</button>
+        <button class="rl-src-tab" id="rl-src-file-btn" onclick="switchRlSrc('file')" type="button">Subir imagen</button>
+      </div>
+      <div id="rl-src-url"><input class="finp" id="rl-portada-url" type="url" placeholder="https://..."></div>
+      <div id="rl-src-file" style="display:none">
+        <div id="rl-av-pr" style="width:60px;height:60px;background:var(--pb);margin-bottom:6px;overflow:hidden"></div>
+        <button type="button" onclick="document.getElementById('rl-av-in').click()" style="font-family:var(--mono);font-size:10px;padding:6px 10px;background:none;border:1px solid var(--pb);cursor:pointer;color:var(--tm)">+ Subir imagen</button>
+        <input id="rl-av-in" type="file" accept="image/png,image/jpeg" style="display:none">
+      </div>
+    </div>
+    <div class="frow"><label class="flbl">Colaboraciones <span style="font-size:9px;color:#999">(opcional)</span></label><input class="finp" id="rl-collabs" type="text" placeholder="Ej: OSSERVATORE, NORMAN BATES"></div>
+    <div class="frow"><label class="flbl">Géneros <span style="font-size:9px;color:#999">(múltiple)</span></label><div id="rl-gen-wrap"></div></div>
+    <div class="frow"><div class="flbl">Links</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input class="finp" id="rl-spotify" type="url" placeholder="♫  Spotify URL">
+        <input class="finp" id="rl-youtube" type="url" placeholder="▶  YouTube URL">
+        <input class="finp" id="rl-soundcloud" type="url" placeholder="◎  SoundCloud URL">
+        <input class="finp" id="rl-bandcamp" type="url" placeholder="⊙  Bandcamp URL">
+        <input class="finp" id="rl-genius" type="url" placeholder="✦  Genius URL">
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--pb)">
+    <button class="mcan" onclick="closeAddRelease()">CANCELAR</button>
+    <button class="madd" id="rl-submit" onclick="submitRelease()">GUARDAR</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Editar lanzamientos -->
+<div id="re-mov" onclick="closeEditReleases()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center">
+<div id="re-modal" onclick="event.stopPropagation()" style="background:var(--bg);border:1px solid var(--pb);width:480px;max-height:88vh;overflow-y:auto;font-family:var(--mono)">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--pb)">
+    <div style="font-size:12px;letter-spacing:2px;font-weight:700">EDITAR LANZAMIENTOS</div>
+    <button onclick="closeEditReleases()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--tm)">✕</button>
+  </div>
+  <div style="padding:0 18px 18px">
+    <div style="display:flex;gap:0;margin:14px 0 10px">
+      <button class="rl-src-tab active" id="retab-lp" onclick="switchReTab('lp')" type="button">LP</button>
+      <button class="rl-src-tab" id="retab-ep" onclick="switchReTab('ep')" type="button">EP</button>
+      <button class="rl-src-tab" id="retab-single" onclick="switchReTab('single')" type="button">Single</button>
+    </div>
+    <div id="re-list"></div>
+  </div>
+</div>
+</div>
+<script src="app.js"></script>
+<script src="auth.js"></script>
+<script src="calendar.js"></script>
+</body>
+</html>
