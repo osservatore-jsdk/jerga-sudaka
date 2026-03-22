@@ -1304,25 +1304,9 @@ function fillAP(a){
   else{yf.src='';yw.style.display='none';}
   // Discografía
   fillDiscoSection(a);
-  // Colabos — AL FINAL, hide if none
-  const cw=document.getElementById('p-cw'),cl=document.getElementById('p-cl');
-  cl.innerHTML='';
-  const collabArtists=getCollabArtists(a);
-  if(collabArtists.length){
-    collabArtists.forEach(c=>{
-      const row=mkRow(c,()=>{closeAP();selectArtist(c.id);});
-      row.addEventListener('mouseenter',()=>{
-        const _ov={}; _ov[c.id]={visible:1,opacity:1,scale:1}; refreshArtistLayer(Object.assign({},_buildOverridesForCurrentState(),_ov));
-      });
-      row.addEventListener('mouseleave',()=>{
-        refreshArtistLayer(_buildOverridesForCurrentState());
-      });
-      cl.appendChild(row);
-    });
-    cw.style.display='';
-  } else {
-    cw.style.display='none';
-  }
+  // Colabos — sección eliminada del panel
+  const cw=document.getElementById('p-cw');
+  if(cw) cw.style.display='none';
 }
 
 function closeAP(collapse = true){
